@@ -1,8 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="UnmanagedDelegates.sbncs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </AdditionalFiles>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mezzo.Generators\Mezzo.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 
 </Project>
