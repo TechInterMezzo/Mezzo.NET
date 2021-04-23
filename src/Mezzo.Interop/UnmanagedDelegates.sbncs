@@ -3,31 +3,33 @@
 namespace Mezzo.Interop
 {
 {{~ for conv in ["Cdecl", "Stdcall", "Thiscall", "Fastcall"] ~}}
-	[StructLayout(LayoutKind.Sequential)]
-	public unsafe readonly struct {{conv}}Action
-	{
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe readonly struct {{conv}}Action
+    {
         public {{conv}}Action(delegate* unmanaged[{{conv}}]<void> pointer) => _pointer = pointer;
         public {{conv}}Action(nint address) => _pointer = (delegate* unmanaged[{{conv}}]<void>)address;
         public nint Address => (nint)_pointer;
+        public bool IsValid => Address != 0;
         public delegate* unmanaged[{{conv}}]<void> Invoke => _pointer;
 
         public static implicit operator {{conv}}Action(delegate* unmanaged[{{conv}}]<void> pointer) => new (pointer);
         public static implicit operator delegate* unmanaged[{{conv}}]<void>({{conv}}Action action) => action._pointer;
-	}
-	[StructLayout(LayoutKind.Sequential)]
-	public unsafe readonly struct {{conv}}Func<TReturn>
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe readonly struct {{conv}}Func<TReturn>
         where TReturn : unmanaged
-	{
+    {
         private readonly delegate* unmanaged[{{conv}}]<TReturn> _pointer;
 
         public {{conv}}Func(delegate* unmanaged[{{conv}}]<TReturn> pointer) => _pointer = pointer;
         public {{conv}}Func(nint address) => _pointer = (delegate* unmanaged[{{conv}}]<TReturn>)address;
         public nint Address => (nint)_pointer;
+        public bool IsValid => Address != 0;
         public delegate* unmanaged[{{conv}}]<TReturn> Invoke => _pointer;
 
         public static implicit operator {{conv}}Func<TReturn>(delegate* unmanaged[{{conv}}]<TReturn> pointer) => new (pointer);
         public static implicit operator delegate* unmanaged[{{conv}}]<TReturn>({{conv}}Func<TReturn> func) => func._pointer;
-	}
+    }
 {{~
 params = []
 for i in 1..6
@@ -35,39 +37,41 @@ params = array.add params "T" + i
 delegate = "delegate* unmanaged[" + conv + "]<" + (params | array.join ", ") + ", void>"
 type = conv + "Action<" + (params | array.join ", ") + ">"
 ~}}
-	[StructLayout(LayoutKind.Sequential)]
-	public unsafe readonly struct {{type}}
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe readonly struct {{type}}
 {{~ for param in params ~}}
         where {{param}} : unmanaged
 {{~ end ~}}
-	{
+    {
         public {{conv}}Action({{delegate}} pointer) => _pointer = pointer;
         public {{conv}}Action(nint address) => _pointer = ({{delegate}})address;
         public nint Address => (nint)_pointer;
+        public bool IsValid => Address != 0;
         public {{delegate}} Invoke => _pointer;
 
         public static implicit operator {{type}}({{delegate}} pointer) => new (pointer);
         public static implicit operator {{delegate}}({{type}} action) => action._pointer;
-	}
+    }
 {{~
 delegate = "delegate* unmanaged[" + conv + "]<" + (params | array.join ", ") + ", TReturn>"
 type = conv + "Func<" + (params | array.join ", ") + ", TReturn>"
 ~}}
-	[StructLayout(LayoutKind.Sequential)]
-	public unsafe readonly struct {{type}}
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe readonly struct {{type}}
 {{~ for param in params ~}}
         where {{param}} : unmanaged
 {{~ end ~}}
         where TReturn : unmanaged
-	{
+    {
         public {{conv}}Func({{delegate}} pointer) => _pointer = pointer;
         public {{conv}}Func(nint address) => _pointer = ({{delegate}})address;
         public nint Address => (nint)_pointer;
+        public bool IsValid => Address != 0;
         public {{delegate}} Invoke => _pointer;
 
         public static implicit operator {{type}}({{delegate}} pointer) => new (pointer);
         public static implicit operator {{delegate}}({{type}} func) => func._pointer;
-	}
+    }
 {{~ end ~}}
 {{~ end ~}}
 }
