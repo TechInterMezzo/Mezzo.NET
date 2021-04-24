@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Mezzo.Interop
 {
@@ -52,16 +53,13 @@ namespace Mezzo.Interop
             for (int i = index; i < _pool.Count; i++)
             {
                 memory = _pool[i];
-                if (!memory.Rented)
+                if (memory.Rent())
                 {
-                    memory.Rented = true;
                     return memory;
                 }
             }
-            memory = new Memory(size)
-            {
-                Rented = true
-            };
+            memory = new Memory(size);
+            memory.Rent();
             _pool.Insert(index, memory);
             return memory;
         }
@@ -92,6 +90,8 @@ namespace Mezzo.Interop
 
         public sealed class Memory : IDisposable
         {
+            private int _rented;
+
             public Memory(int size)
             {
                 Pointer = new BytePtr(Marshal.AllocHGlobal(size));
@@ -100,13 +100,17 @@ namespace Mezzo.Interop
 
             internal BytePtr Pointer { get; }
             internal int Size { get; }
-            internal bool Rented { get; set; }
 
             public Span<byte> Span => Pointer.AsSpan(Size);
 
             public void Dispose()
             {
-                Rented = false;
+                Interlocked.Exchange(ref _rented, 0);
+            }
+
+            internal bool Rent()
+            {
+                return Interlocked.Exchange(ref _rented, 1) == 0;
             }
         }
     }
