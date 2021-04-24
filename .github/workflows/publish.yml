@@ -14,4 +14,4 @@ jobs:
       - name: Build packages
         run: dotnet pack -c Release -o ".packages"
       - name: Publish packages
-        run: dotnet nuget push ".packages/*.nupkg" --api-key ${{secrets.GITHUB_TOKEN}} --source "github"
+        run: dotnet nuget push ".packages/*.nupkg" --api-key "${{secrets.GITHUB_TOKEN}}" --source "https://nuget.pkg.github.com/TechInterMezzo/index.json"
