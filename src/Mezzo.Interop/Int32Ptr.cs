@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Mezzo.Interop
 {
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct Int32Ptr
     {
         private readonly int* _pointer;

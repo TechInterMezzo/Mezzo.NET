@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Mezzo.Interop
 {
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct CString
     {
         private readonly byte* _pointer;
@@ -82,7 +83,7 @@ namespace Mezzo.Interop
             {
                 throw new NullPointerException();
             }
-            return Marshal.PtrToStringUTF8((IntPtr)_pointer) ?? "";
+            return Marshal.PtrToStringUTF8(Address) ?? "";
         }
 
         public static implicit operator CString(byte* pointer) => new(pointer);

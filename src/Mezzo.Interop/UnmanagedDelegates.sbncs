@@ -6,6 +6,8 @@ namespace Mezzo.Interop
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct {{conv}}Action
     {
+        private readonly delegate* unmanaged[{{conv}}]<void> _pointer;
+
         public {{conv}}Action(delegate* unmanaged[{{conv}}]<void> pointer) => _pointer = pointer;
         public {{conv}}Action(nint address) => _pointer = (delegate* unmanaged[{{conv}}]<void>)address;
         public nint Address => (nint)_pointer;
@@ -43,6 +45,8 @@ type = conv + "Action<" + (params | array.join ", ") + ">"
         where {{param}} : unmanaged
 {{~ end ~}}
     {
+        private readonly {{delegate}} _pointer;
+
         public {{conv}}Action({{delegate}} pointer) => _pointer = pointer;
         public {{conv}}Action(nint address) => _pointer = ({{delegate}})address;
         public nint Address => (nint)_pointer;
@@ -63,6 +67,8 @@ type = conv + "Func<" + (params | array.join ", ") + ", TReturn>"
 {{~ end ~}}
         where TReturn : unmanaged
     {
+        private readonly {{delegate}} _pointer;
+
         public {{conv}}Func({{delegate}} pointer) => _pointer = pointer;
         public {{conv}}Func(nint address) => _pointer = ({{delegate}})address;
         public nint Address => (nint)_pointer;

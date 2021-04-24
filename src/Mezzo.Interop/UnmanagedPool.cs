@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mezzo.Interop
 {
@@ -32,29 +29,80 @@ namespace Mezzo.Interop
         {
             if (!_disposed)
             {
+                foreach (Memory memory in _pool)
+                {
+                    Marshal.FreeHGlobal(memory.Pointer.Address);
+                }
                 if (disposing)
                 {
-                    // TODO: Verwalteten Zustand (verwaltete Objekte) bereinigen
+                    _pool.Clear();
                 }
-
-                
                 _disposed = true;
             }
         }
 
+        public Memory Rent(int size)
+        {
+            int index = BinarySearch(size);
+            if (index < 0)
+            {
+                index = ~index;
+            }
+            Memory memory;
+            for (int i = index; i < _pool.Count; i++)
+            {
+                memory = _pool[i];
+                if (!memory.Rented)
+                {
+                    memory.Rented = true;
+                    return memory;
+                }
+            }
+            memory = new Memory(size)
+            {
+                Rented = true
+            };
+            _pool.Insert(index, memory);
+            return memory;
+        }
+
+        private int BinarySearch(int size)
+        {
+            int lo = 0;
+            int hi = _pool.Count - 1;
+            while (lo <= hi)
+            {
+                int i = (int)(((uint)hi + (uint)lo) >> 1);
+                int c = size - _pool[i].Size;
+                if (c == 0)
+                {
+                    return i;
+                }
+                else if (c > 0)
+                {
+                    lo = i + 1;
+                }
+                else
+                {
+                    hi = i - 1;
+                }
+            }
+            return ~lo;
+        }
+
         public sealed class Memory : IDisposable
         {
-            private readonly BytePtr _pointer;
-            private readonly int _size;
-
             public Memory(int size)
             {
-                _pointer = new BytePtr(Marshal.AllocHGlobal(size));
-                _size = size;
+                Pointer = new BytePtr(Marshal.AllocHGlobal(size));
+                Size = size;
             }
 
+            internal BytePtr Pointer { get; }
+            internal int Size { get; }
             internal bool Rented { get; set; }
-            public Span<byte> Span => _pointer.AsSpan(_size);
+
+            public Span<byte> Span => Pointer.AsSpan(Size);
 
             public void Dispose()
             {

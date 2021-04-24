@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace Mezzo.Interop
 {
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct BytePtr
     {
         private readonly byte* _pointer;
