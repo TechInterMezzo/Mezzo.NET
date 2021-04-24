@@ -20,7 +20,7 @@ jobs:
       - name: Determine version
         uses: gittools/actions/gitversion/execute@v0.9.9
         with:
-          additionalArguments: '/updateprojectfiles'
+          additionalArguments: '/updateprojectfiles /overrideconfig mode=Mainline'
       - name: Build packages
         run: dotnet pack -c Release -o ".packages"
       - name: Publish packages
